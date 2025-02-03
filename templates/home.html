@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ username }}!</h2>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>Your Families</h3>
+        <form method="POST" action="{{ url_for('add_family') }}" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="name" class="form-control" placeholder="New Family Name" required>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Add Family</button>
+                </div>
+            </div>
+        </form>
+
+        {% for family in owned_families %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h4 class="card-title">{{ family.name }}</h4>
+                
+                <form method="POST" action="{{ url_for('add_family_member', family_id=family.id) }}" class="mb-2">
+                    <div class="input-group">
+                        <input type="text" name="username" class="form-control" placeholder="Username to add" required>
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-info">Add Member</button>
+                        </div>
+                    </div>
+                </form>
+
+                <form method="POST" action="{{ url_for('add_shopping_list', family_id=family.id) }}" class="mb-2">
+                    <div class="input-group">
+                        <input type="text" name="name" class="form-control" placeholder="New List Name" required>
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-success">Add List</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% for list in family.shopping_lists %}
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ list.name }}</h5>
+                        <form method="POST" action="{{ url_for('add_shopping_item', list_id=list.id) }}" class="mb-2">
+                            <div class="input-group">
+                                <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+                                <input type="number" name="quantity" class="form-control" value="1" min="1">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-success">Add Item</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <ul class="list-group">
+                            {% for item in list.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <form method="POST" action="{{ url_for('toggle_item', item_id=item.id) }}" style="display: inline;">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" onChange="this.form.submit()" 
+                                               {% if item.completed %}checked{% endif %}>
+                                        <label class="form-check-label {% if item.completed %}text-muted{% endif %}">
+                                            {{ item.name }} (x{{ item.quantity }})
+                                        </label>
+                                    </div>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                        <form method="POST" action="{{ url_for('delete_shopping_list', list_id=list.id) }}" class="mt-2">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete List</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-6">
+        <h3>Families You're In</h3>
+        {% for family in member_families %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h4 class="card-title">{{ family.name }}</h4>
+                
+                {% for list in family.shopping_lists %}
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ list.name }}</h5>
+                        <form method="POST" action="{{ url_for('add_shopping_item', list_id=list.id) }}" class="mb-2">
+                            <div class="input-group">
+                                <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+                                <input type="number" name="quantity" class="form-control" value="1" min="1">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-success">Add Item</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <ul class="list-group">
+                            {% for item in list.items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <form method="POST" action="{{ url_for('toggle_item', item_id=item.id) }}" style="display: inline;">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" onChange="this.form.submit()" 
+                                               {% if item.completed %}checked{% endif %}>
+                                        <label class="form-check-label {% if item.completed %}text-muted{% endif %}">
+                                            {{ item.name }} (x{{ item.quantity }})
+                                        </label>
+                                    </div>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

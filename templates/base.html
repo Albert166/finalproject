@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Family Shopping List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Shopping List App</a>
+        {% if session.user_id %}
+        <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+        {% endif %}
+    </nav>
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
