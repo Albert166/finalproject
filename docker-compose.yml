@@ -1,24 +1,33 @@
 services:
-  web:
-    build: .
+  nginx:
+    image: nginx:latest
     ports:
-      - "5000:5000"
+      - "0.0.0.0:80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flask_app
+    networks:
+      - app-network
+
+  flask_app:
+    build: .
+    expose:
+      - "5000"
     environment:
       - FLASK_APP=app.py
-      - FLASK_ENV=production
+      - FLASK_ENV=production 
       - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:password@db/shopping_list
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
     networks:
       - app-network
 
   db:
     image: mysql:8.0
     ports:
-      - "3306:3306"
+      - "3306"
     environment:
       - MYSQL_DATABASE=shopping_list
       - MYSQL_USER=user
@@ -26,7 +35,7 @@ services:
       - MYSQL_ROOT_PASSWORD=rootpassword
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
@@ -40,3 +49,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+

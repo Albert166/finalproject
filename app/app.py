@@ -3,40 +3,23 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 import pymysql
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'
+# Should use environment variables for sensitive values
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1, x_prefix=1
+)
+app.config['SECRET_KEY'] = 'your-secret-key'  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://user:password@db:3306/shopping_list'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Define admin password
 admin_password = generate_password_hash('admin')
-
-@app.before_first_request
-def initialize_database():
-    # Create all database tables
-    db.create_all()
-
-    # Check if admin user exists 
-    admin = User.query.filter_by(username='admin').first()
-    if not admin:
-        # Create default admin user
-        admin = User(username='admin', password=admin_password)
-        db.session.add(admin)
-        db.session.commit()
-        
-        # Create default family for admin
-        default_family = Family(name='My Family', user_id=admin.id)
-        db.session.add(default_family)
-        db.session.commit()
-        
-        # Create default shopping list
-        default_list = ShoppingList(name='Groceries', family_id=default_family.id)
-        db.session.add(default_list)
-        db.session.commit()
 
 # Association table for family members
 family_members = db.Table('family_members',
@@ -45,6 +28,7 @@ family_members = db.Table('family_members',
 )
 
 class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
@@ -53,12 +37,14 @@ class User(db.Model):
     shopping_lists = db.relationship('ShoppingList', backref='creator', lazy=True)
 
 class Family(db.Model):
+    __tablename__ = 'family'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     shopping_lists = db.relationship('ShoppingList', backref='family', lazy=True, cascade='all, delete-orphan')
 
 class ShoppingList(db.Model):
+    __tablename__ = 'shopping_list'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     family_id = db.Column(db.Integer, db.ForeignKey('family.id'), nullable=False)
@@ -66,11 +52,36 @@ class ShoppingList(db.Model):
     items = db.relationship('ShoppingItem', backref='shopping_list', lazy=True, cascade='all, delete-orphan')
 
 class ShoppingItem(db.Model):
+    __tablename__ = 'shopping_item'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
-    quantity = db.Column(db.Integer, default=1)
+    quantity = db.Column(db.Float, default=1.0)
     completed = db.Column(db.Boolean, default=False)
+    measuring_units = db.Column(db.String(80))
     shopping_list_id = db.Column(db.Integer, db.ForeignKey('shopping_list.id'), nullable=False)
+
+def initialize_database():
+    with app.app_context():
+        # Create all database tables
+        db.create_all()
+
+        # Check if admin user exists 
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            # Create default admin user
+            admin = User(username='admin', password=admin_password)
+            db.session.add(admin)
+            db.session.commit()
+            
+            # Create default family for admin
+            default_family = Family(name='My Family', user_id=admin.id)
+            db.session.add(default_family)
+            db.session.commit()
+            
+            # Create default shopping list
+            default_list = ShoppingList(name='Groceries', family_id=default_family.id, creator_id=admin.id)
+            db.session.add(default_list)
+            db.session.commit()
 
 @app.route('/')
 def home():
@@ -108,6 +119,11 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        
+        # Check if username already exists
+        if User.query.filter_by(username=username).first():
+            return render_template('register.html', error="Username already exists")
+            
         hashed_password = generate_password_hash(password)
         
         new_user = User(username=username, password=hashed_password)
@@ -139,13 +155,25 @@ def add_family_member(family_id):
     username = request.form['username']
     user = User.query.filter_by(username=username).first()
     family = Family.query.get_or_404(family_id)
-    
-    if user and family.user_id == session['user_id']:
-        family.members.append(user)
-        db.session.commit()
-    
-    return redirect(url_for('home'))
 
+    usert = User.query.get(session['user_id'])
+    owned_families = Family.query.filter_by(user_id=session['user_id']).all()
+    member_families = usert.member_of
+
+    if user is None:
+        return render_template('home.html', owned_families=owned_families, member_families=member_families, username=usert.username, error="Username does not exist")
+
+    if user and family.user_id == session['user_id']:
+        # Check if user is already a member
+        if user not in family.members:
+            family.members.append(user)
+            db.session.commit()
+            return redirect(url_for('home'))
+        elif user in family.members:
+            return render_template('home.html', owned_families=owned_families, member_families=member_families, username=usert.username, error="User is already a member of this family")
+    return redirect(url_for('add_family_member'))
+    
+   
 @app.route('/add_shopping_list/<int:family_id>', methods=['POST'])
 def add_shopping_list(family_id):
     if 'user_id' not in session:
@@ -187,14 +215,15 @@ def add_shopping_item(list_id):
         return redirect(url_for('login'))
         
     name = request.form['name']
-    quantity = request.form.get('quantity', 1, type=int)
+    quantity = request.form.get('quantity', 1.0, type=float)
+    measuring_units = request.form.get('measuring_units', "kg" , type=str)
     
     shopping_list = ShoppingList.query.get_or_404(list_id)
     family = Family.query.get(shopping_list.family_id)
     
     # Allow both owner and members to add items
     if family.user_id == session['user_id'] or session['user_id'] in [member.id for member in family.members]:
-        new_item = ShoppingItem(name=name, quantity=quantity, shopping_list_id=list_id)
+        new_item = ShoppingItem(name=name, quantity=quantity, measuring_units=measuring_units, shopping_list_id=list_id)
         db.session.add(new_item)
         db.session.commit()
     
@@ -220,11 +249,7 @@ def toggle_item(item_id):
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
+
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
-
-
-
-
+    app.run(host='0.0.0.0')
