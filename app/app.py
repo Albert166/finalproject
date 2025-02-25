@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 import pymysql
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 
 pymysql.install_as_MySQLdb()
@@ -94,7 +95,10 @@ def home():
         return redirect(url_for('login'))
     owned_families = Family.query.filter_by(user_id=session['user_id']).all()
     member_families = user.member_of
-    return render_template('home.html', owned_families=owned_families, member_families=member_families, username=user.username)
+    return render_template('home.html', 
+                           owned_families=owned_families,
+                            member_families=member_families,
+                             username=user.username)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -102,7 +106,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        
+
         if user is None:
             return render_template('login.html', error="Username does not exist")
             
@@ -161,7 +165,11 @@ def add_family_member(family_id):
     member_families = usert.member_of
 
     if user is None:
-        return render_template('home.html', owned_families=owned_families, member_families=member_families, username=usert.username, error="Username does not exist")
+        return render_template('home.html',
+                                owned_families=owned_families,
+                                  member_families=member_families,
+                                    username=usert.username,
+                                      error="Username does not exist")
 
     if user and family.user_id == session['user_id']:
         # Check if user is already a member
@@ -170,7 +178,11 @@ def add_family_member(family_id):
             db.session.commit()
             return redirect(url_for('home'))
         elif user in family.members:
-            return render_template('home.html', owned_families=owned_families, member_families=member_families, username=usert.username, error="User is already a member of this family")
+            return render_template('home.html',
+                                    owned_families=owned_families,
+                                      member_families=member_families,
+                                        username=usert.username,
+                                          error="User is already a member of this family")
     return redirect(url_for('add_family_member'))
     
    
@@ -223,7 +235,10 @@ def add_shopping_item(list_id):
     
     # Allow both owner and members to add items
     if family.user_id == session['user_id'] or session['user_id'] in [member.id for member in family.members]:
-        new_item = ShoppingItem(name=name, quantity=quantity, measuring_units=measuring_units, shopping_list_id=list_id)
+        new_item = ShoppingItem(name=name,
+                                 quantity=quantity,
+                                   measuring_units=measuring_units,
+                                     shopping_list_id=list_id)
         db.session.add(new_item)
         db.session.commit()
     
@@ -253,3 +268,4 @@ def logout():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
+    
