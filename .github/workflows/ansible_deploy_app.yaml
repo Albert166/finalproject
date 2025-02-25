@@ -1,0 +1,47 @@
+name: Deploy shopping list web-app on ec2 instance
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy EC2 Instance"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    name: Deploy Ansible Playbook
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          
+      - name: Install Ansible
+        shell: bash
+        run: |
+          pip3 install ansible
+          pip3 install requests
+          pip3 install python-dateutil
+        
+      - name: Install boto3 and botocore
+        run: |
+          pip3 install boto3
+          pip3 install botocore
+  
+      - name: Install amazon-aws pluigin
+        shell: bash
+        run : ansible-galaxy collection install amazon.aws
+
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_USER: ubuntu
+          ANSIBLE_HOST_KEY_CHECKING: False
+        run: |
+          ansible-playbook -i aws_ec2.yml playbook.yml --private-key private_key.pem -u ubuntu

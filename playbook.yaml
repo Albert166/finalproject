@@ -1,0 +1,86 @@
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: latest
+        update_cache: true
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /home/ubuntu/app
+        state: directory
+        mode: '0755'
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy file with new permissions
+      ansible.builtin.copy:
+        src: /app
+        dest: /home/ubuntu/app
+        mode: '0644'
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy CA files
+      copy:
+       src: '{{item}}'
+       dest: /home/ubuntu/
+       owner: ubuntu
+       group: ubuntu
+       mode: 0644
+      loop:
+    - docker-compose.yml
+    - nginx.conf
+    - dockerfile.yaml
+
+    - name: Adding ubuntu to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Run docker compose
+      ansible.builtin.command: docker-compose up -build -d
+      args:
+        chdir: /home/ubuntu/
+      register: docker_compose_output
+
+    - name: Check running Docker containers
+      ansible.builtin.command: docker ps
+      register: docker_ps_output
+
+    - name: Display running containers
+      ansible.builtin.debug:
+        msg: "{{ docker_ps_output.stdout }}"
