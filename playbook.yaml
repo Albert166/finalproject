@@ -46,7 +46,7 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Copy file with new permissions
+    - name: Copy directory
       ansible.builtin.copy:
         src: /app/.
         dest: /home/ubuntu/app/.
@@ -62,10 +62,10 @@
         group: ubuntu
         mode: '0644'
       loop:
-        - docker-compose.yml
-        - nginx.conf
-        - dockerfile.yaml
-        - db_init
+        - ./docker-compose.yml
+        - ./nginx.conf
+        - ./dockerfile.yaml
+        - ./db_init
 
     - name: Adding ubuntu to docker group
       ansible.builtin.user:
