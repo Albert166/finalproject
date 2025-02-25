@@ -2,7 +2,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-
+# EC2 Instance
 resource "aws_instance" "shopping_list_instance" {
   ami           = "ami-0a628e1e89aaedf80"
   instance_type = var.instance_type
@@ -68,7 +68,7 @@ resource "aws_subnet" "main-b" {
   }
 }
 
-# Security Group
+# Security Group for HTTP so it would allow global connections from port 80
 resource "aws_security_group" "https" {
   vpc_id = aws_vpc.main.id
   name   = "Allow Global HTTP"
@@ -92,7 +92,7 @@ resource "aws_security_group" "https" {
     Source = "Global"
   }
 }
-
+# Security Group for ssh so that ansible can connect to ec2 instance though port 22
 resource "aws_security_group" "ssh" {
   vpc_id = aws_vpc.main.id
 
@@ -107,7 +107,7 @@ resource "aws_security_group" "ssh" {
     Source = "Global"
   }
 }
-
+# Route Table Association
 resource "aws_route_table_association" "main" {
   subnet_id      = aws_subnet.main-b.id
   route_table_id = aws_route_table.main.id
