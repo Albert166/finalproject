@@ -53,6 +53,7 @@
         mode: '0644'
         owner: ubuntu
         group: ubuntu
+        remote_src: false
 
     - name: Copy Docker files
       ansible.builtin.copy:
@@ -61,6 +62,7 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
+        remote_src: false
       loop:
         - ./docker-compose.yml
         - ./nginx.conf
