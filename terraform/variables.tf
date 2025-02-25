@@ -1,5 +1,6 @@
 variable "aws_region" {
   description = "AWS region to deploy resources"
+  # Change to yourr desired region
   default     = "eu-central-1"
 }
 
@@ -22,20 +23,7 @@ variable "availability_zone_a" {
 
 variable "instance_type" {
   description = "Type of EC2 instance"
+  # Change to your desired instance type
   default     = "t2.micro"
 }
 
-variable "backend_bucket" {
-  description = "Name of the S3 bucket to store the Terraform state"
-  default     = "albertt-terraform-state"
-}
-
-variable "backend_key" {
-  description = "Key of the S3 bucket to store the Terraform state"
-  default     = "terraform/final-project/terraform.tfstate"
-}
-
-variable "dynamodb_table" {
-  description = "Name of the DynamoDB table to store the Terraform state lock"
-  default     = "albertt-terraform-state-lock"
-}
