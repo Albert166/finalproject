@@ -48,7 +48,7 @@
 
     - name: Copy directory
       ansible.builtin.copy:
-        src: /app/
+        src: ./app/
         dest: /home/ubuntu/app/
         mode: '0644'
         owner: ubuntu
