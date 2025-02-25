@@ -46,7 +46,7 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Copy directory
+    - name: Copying app
       ansible.builtin.copy:
         src: ./app/
         dest: /home/ubuntu/app/
@@ -55,7 +55,7 @@
         group: ubuntu
         remote_src: false
 
-    - name: Copy Docker files
+    - name: Copying docker and other needed files to the remote host
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /home/ubuntu/
@@ -68,6 +68,7 @@
         - ./nginx.conf
         - ./dockerfile
         - ./db_init
+        - ./requirements.txt
 
     - name: Adding ubuntu to docker group
       ansible.builtin.user:
@@ -82,6 +83,7 @@
         state: present
         build: always
         recreate: always
+        pull: missing
 
     - name: Check running Docker containers
       ansible.builtin.command: docker ps
