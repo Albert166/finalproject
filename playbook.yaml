@@ -48,8 +48,8 @@
 
     - name: Copy directory
       ansible.builtin.copy:
-        src: /app/.
-        dest: /home/ubuntu/app/.
+        src: /app/
+        dest: /home/ubuntu/app/
         mode: '0644'
         owner: ubuntu
         group: ubuntu
@@ -57,7 +57,7 @@
     - name: Copy Docker files
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /home/ubuntu/.
+        dest: /home/ubuntu/
         owner: ubuntu
         group: ubuntu
         mode: '0644'
