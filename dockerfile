@@ -12,10 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code into container
 COPY ./app/ .
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
-ENV SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:password@db/shopping_list
 
 # Expose port 5000
 EXPOSE 5000
