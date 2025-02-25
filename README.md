@@ -1,7 +1,7 @@
 # Shopping list app
 ## Introduction
 
-Shopping list app meant to help you communicate with your household to help get your shopping done faster.
+Shopping list is a simple web-app meant to help you communicate with your household to help get your shopping done faster.
 
 ## App description
 
@@ -68,4 +68,4 @@ App is written in python using flask module it also uses uwsgi proxy which then 
     --query "KeyMaterial" \
     --output text > my-key-pair.pem`. Your private key wil be `my-key-pair.pem' in this example.
 6. Find your instance dns name by running `ansible-inventory -i aws_ec2.yaml --list | grep public_dns_name | head -1`
-7. Then copy it to your browser and you can use the app :).
+7. Then copy it to your browser and connect to the app.
