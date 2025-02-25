@@ -76,8 +76,12 @@
         append: yes
 
     - name: Run docker compose
-      ansible.builtin.shell: docker-compose up --build
-      register: docker_compose_output
+      community.docker.docker_compose_v2:
+        project_src: /home/ubuntu
+        project_name: shopping_list
+        state: present
+        build: yes
+        recreate: yes
 
     - name: Check running Docker containers
       ansible.builtin.command: docker ps
