@@ -61,7 +61,7 @@ App is written in python using flask module it also uses uwsgi proxy which then 
 2. You can change your region and instance type which will run the app in `/terraform/variables.tf`
 3. Then in the folder `/terraform` run `terraform init` then `terraform apply --auto-approve`
 4. Then change `./aws_ec2.yaml` region to which you changed `/terrform/variables.tf` file.
-5. After terraform is done run `ansible-playbook -i aws_ec2.yaml playbook.yaml --private-key private_key.pem -u ubuntu` Replace `private_key.pem` with private key with your key which you can create in Amazon cli by running this command `aws ec2 create-key-pair \
+5. After terraform is done run `ansible-playbook -i aws_ec2.yaml playbook.yaml --private-key private_key.pem -u ubuntu` Replace `private_key.pem` with your key which you can create in Amazon cli by running this command `aws ec2 create-key-pair \
     --key-name my-key-pair \
     --key-type rsa \
     --key-format pem \
