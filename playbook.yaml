@@ -53,7 +53,7 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Copy CA files
+    - name: Copy Docker files
       copy:
        src: '{{item}}'
        dest: /home/ubuntu/
@@ -64,6 +64,7 @@
     - docker-compose.yml
     - nginx.conf
     - dockerfile.yaml
+    - db_init
 
     - name: Adding ubuntu to docker group
       user:
