@@ -10,9 +10,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
+# Should use environment variables for sensitive values
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1, x_prefix=1
 )
+app.config['SECRET_KEY'] = 'your-secret-key'  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://user:password@db:3306/shopping_list'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
