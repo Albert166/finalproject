@@ -76,7 +76,7 @@
         append: yes
 
     - name: Run docker compose
-      ansible.builtin.command: docker-compose up --build -d
+      ansible.builtin.command: docker-compose up --build
       args:
         chdir: /home/ubuntu/
       register: docker_compose_output
