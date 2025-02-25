@@ -1,3 +1,4 @@
+---
 - hosts: all
   become: true
 
@@ -54,26 +55,26 @@
         group: ubuntu
 
     - name: Copy Docker files
-      copy:
-       src: '{{item}}'
-       dest: /home/ubuntu/
-       owner: ubuntu
-       group: ubuntu
-       mode: 0644
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /home/ubuntu/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
       loop:
-    - docker-compose.yml
-    - nginx.conf
-    - dockerfile.yaml
-    - db_init
+        - docker-compose.yml
+        - nginx.conf
+        - dockerfile.yaml
+        - db_init
 
     - name: Adding ubuntu to docker group
-      user:
+      ansible.builtin.user:
         name: ubuntu
         groups: docker
         append: yes
 
     - name: Run docker compose
-      ansible.builtin.command: docker-compose up -build -d
+      ansible.builtin.command: docker-compose up --build -d
       args:
         chdir: /home/ubuntu/
       register: docker_compose_output
