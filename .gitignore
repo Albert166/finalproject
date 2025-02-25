@@ -41,3 +41,6 @@ CA-Devops.code-workspace
 
 # Ignore vscode files
 .vscode/*
+
+# Ignore __pycache__
+__pycache__/*
