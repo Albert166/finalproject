@@ -76,9 +76,7 @@
         append: yes
 
     - name: Run docker compose
-      ansible.builtin.command: docker-compose up --build
-      args:
-        chdir: /home/ubuntu/
+      ansible.builtin.shell: docker-compose up --build
       register: docker_compose_output
 
     - name: Check running Docker containers
