@@ -80,8 +80,8 @@
         project_src: /home/ubuntu
         project_name: shopping_list
         state: present
-        build: allways
-        recreate: allways
+        build: always
+        recreate: always
 
     - name: Check running Docker containers
       ansible.builtin.command: docker ps
