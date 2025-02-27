@@ -1,0 +1,61 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "0.0.0.0:80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flask_app
+    networks:
+      - app-network
+
+  flask_app:
+    image: albertasm/shopping_list:latest
+    expose:
+      - "5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production 
+      - SQLALCHEMY_DATABASE_URI=mysql+pymysql://user:password@db/shopping_list
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-central-1
+        awslogs-group: shopping-list
+    restart: always
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306"
+    environment:
+      - MYSQL_DATABASE=shopping_list
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+
+
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
+
