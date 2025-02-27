@@ -77,8 +77,8 @@
         append: yes
     - name: Log into Docker Hub
       community.general.docker_login:
-        username: ${{ lookup('env', 'DOCKER_USERNAME') }}
-        password: ${{ lookup('env', 'DOCKER_PASSWORD') }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
     
     - name: Run docker compose
       community.docker.docker_compose_v2:
