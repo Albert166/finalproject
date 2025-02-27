@@ -46,16 +46,7 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Copying app
-      ansible.builtin.copy:
-        src: ./app/
-        dest: /home/ubuntu/app/
-        mode: '0644'
-        owner: ubuntu
-        group: ubuntu
-        remote_src: false
-
-    - name: Copying docker and other needed files to the remote host
+    - name: Copying docker-compose and other needed files to the remote host
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /home/ubuntu/
@@ -66,19 +57,19 @@
       loop:
         - ./docker-compose.yml
         - ./nginx.conf
-        - ./dockerfile
         - ./db_init
-        - ./requirements.txt
+        
 
     - name: Adding ubuntu to docker group
       ansible.builtin.user:
         name: ubuntu
         groups: docker
         append: yes
+    
     - name: Log into Docker Hub
       community.general.docker_login:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: {{ DOCKER_USERNAME }}
+        password: {{ DOCKER_PASSWORD }}
     
     - name: Run docker compose
       community.docker.docker_compose_v2:

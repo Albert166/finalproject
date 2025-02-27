@@ -46,4 +46,4 @@ jobs:
           ANSIBLE_USER: ubuntu
           ANSIBLE_HOST_KEY_CHECKING: False
         run: |
-          ansible-playbook -i aws_ec2.yaml playbook_makefile.yaml --private-key private_key.pem -u ubuntu -e "DOCKER_USERNAME=${DOCKER_USERNAME} DOCKER_PASSWORD=${DOCKER_PASSWORD}"
+          ansible-playbook -i aws_ec2.yaml playbook_makefile.yaml --private-key private_key.pem -u ubuntu 
