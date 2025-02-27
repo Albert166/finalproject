@@ -49,7 +49,7 @@ App is written in python using flask module it also uses uwsgi proxy which then 
 ### Amazon EC2
 #### Steps for deploying on ec2 instance on amazon aws
 * Terraform is using backend for it to properly work, so you will need to configure backend so it would work for you. For that you will need your own s3 bucket and dynamodb table.
-* Disclamer it costs money. More info on that in amazon AWS website.
+* **Disclamer it costs money. More info on that in amazon AWS website.**
 * Requirements for this is to have installed.
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 2. [Have an AWS account.](https://aws.amazon.com/)
