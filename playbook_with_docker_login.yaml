@@ -70,6 +70,8 @@
       community.docker.docker_compose_v2:
         project_src: /home/ubuntu
         project_name: shopping_list
+        files:
+          - docker-compose-cloudwatch.yml
         state: present
         build: always
         recreate: always
