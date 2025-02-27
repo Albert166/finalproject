@@ -11,7 +11,7 @@ services:
       - app-network
 
   flask_app:
-    build: .
+    image: albertasm/shopping_list:latest
     expose:
       - "5000"
     environment:
