@@ -50,7 +50,7 @@
         mode: '0644'
         remote_src: false
       loop:
-        - ./docker-compose-cloudwatch.yml
+        - ./docker-compose_cw.yml
         - ./nginx.conf
         - ./db_init
         
@@ -71,7 +71,7 @@
         project_src: /home/ubuntu
         project_name: shopping_list
         files:
-          - docker-compose-cloudwatch.yml
+          - docker-compose_cw.yml
         state: present
         build: always
         recreate: always
