@@ -50,9 +50,9 @@
         mode: '0644'
         remote_src: false
       loop:
+        - ./docker-compose.yml
         - ./nginx.conf
         - ./db_init
-        - ./docker-compose-cloudwatch.yml
         
 
     - name: Adding ubuntu to docker group
