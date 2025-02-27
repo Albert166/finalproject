@@ -37,12 +37,18 @@ App is written in python using flask module it also uses uwsgi proxy which then 
 * Ansible playbook is located in `/playbook.yaml`
 * Ansible is using dynamic inventory named `/aws_ec2.yaml` which gets all the ec2 instances in the selected region. And configures them to run the app.
 
+### Makefile
+* Makefile builds and deploys the webapp part to the docker registry
+
 
 
 ## Installiation
 ### Docker
 1. You need to have docker compose installed on your system. [Docker compose Installation guide.](https://docs.docker.com/compose/install/)
-2. Clone the repository.
+2. You will need to download from repository 
+  - `db-init` folder
+  - `nginx.conf`
+  - `docker-compose.yaml`
 3. Run `docker compose up --build`.
 4. Connect to the app by typing `localhost` in browser.
 
@@ -57,15 +63,16 @@ App is written in python using flask module it also uses uwsgi proxy which then 
 4. [Ansible full package](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 * Installation
-1. First you will need to configure `/terraform/backend.tf` file to change values.
-2. You can change your region and instance type which will run the app in `/terraform/variables.tf`
-3. Then in the folder `/terraform` run `terraform init` then `terraform apply --auto-approve`
-4. Then change `./aws_ec2.yaml` region to which you changed `/terrform/variables.tf` file.
-5. After terraform is done run `ansible-playbook -i aws_ec2.yaml playbook.yaml --private-key private_key.pem -u ubuntu` Replace `private_key.pem` with your key which you can create in Amazon cli by running this command `aws ec2 create-key-pair \
+1. Clone the repository
+2. First you will need to configure `/terraform/backend.tf` file to change values.
+3. You can change your region and instance type which will run the app in `/terraform/variables.tf`
+4. Then in the folder `/terraform` run `terraform init` then `terraform apply --auto-approve`
+5. Then change `./aws_ec2.yaml` region to which you changed `/terrform/variables.tf` file.
+6. After terraform is done run `ansible-playbook -i aws_ec2.yaml playbook.yaml --private-key private_key.pem -u ubuntu` Replace `private_key.pem` with your key which you can create in Amazon cli by running this command `aws ec2 create-key-pair \
     --key-name my-key-pair \
     --key-type rsa \
     --key-format pem \
     --query "KeyMaterial" \
     --output text > my-key-pair.pem`. Your private key wil be `my-key-pair.pem' in this example.
-6. Find your instance dns name by running `ansible-inventory -i aws_ec2.yaml --list | grep public_dns_name | head -1`
-7. Then copy it to your browser and connect to the app.
+7. Find your instance dns name by running `ansible-inventory -i aws_ec2.yaml --list | grep public_dns_name | head -1`
+8. Then copy it to your browser and connect to the app.
