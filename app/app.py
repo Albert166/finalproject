@@ -9,8 +9,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 pymysql.install_as_MySQLdb()
 
+# App Configuration
 app = Flask(__name__)
-# Should use environment variables for sensitive values
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1, x_prefix=1
 )
@@ -61,29 +61,7 @@ class ShoppingItem(db.Model):
     measuring_units = db.Column(db.String(80))
     shopping_list_id = db.Column(db.Integer, db.ForeignKey('shopping_list.id'), nullable=False)
 
-def initialize_database():
-    with app.app_context():
-        # Create all database tables
-        db.create_all()
-
-        # Check if admin user exists 
-        admin = User.query.filter_by(username='admin').first()
-        if not admin:
-            # Create default admin user
-            admin = User(username='admin', password=admin_password)
-            db.session.add(admin)
-            db.session.commit()
-            
-            # Create default family for admin
-            default_family = Family(name='My Family', user_id=admin.id)
-            db.session.add(default_family)
-            db.session.commit()
-            
-            # Create default shopping list
-            default_list = ShoppingList(name='Groceries', family_id=default_family.id, creator_id=admin.id)
-            db.session.add(default_list)
-            db.session.commit()
-
+# Home page
 @app.route('/')
 def home():
     if 'user_id' not in session:
@@ -100,6 +78,7 @@ def home():
                             member_families=member_families,
                              username=user.username)
 
+# Login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -118,6 +97,7 @@ def login():
         
     return render_template('login.html')
 
+# Register page
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -138,6 +118,7 @@ def register():
         
     return render_template('register.html')
 
+# Add create family functionality
 @app.route('/add_family', methods=['POST'])
 def add_family():
     if 'user_id' not in session:
@@ -151,6 +132,25 @@ def add_family():
     
     return redirect(url_for('home'))
 
+
+# Delete family functionality
+@app.route('/delete_family/<int:family_id>', methods=['POST'])
+def delete_family(family_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    family = Family.query.get_or_404(family_id)
+
+    # Only allow family owner to delete
+    if family.user_id == session['user_id']:
+        db.session.delete(family)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        # Return to home if not the owner
+        return redirect(url_for('home'))
+
+# Add family member functionality
 @app.route('/add_family_member/<int:family_id>', methods=['POST'])
 def add_family_member(family_id):
     if 'user_id' not in session:
@@ -172,7 +172,6 @@ def add_family_member(family_id):
                                       error="Username does not exist")
 
     if user and family.user_id == session['user_id']:
-        # Check if user is already a member
         if user not in family.members:
             family.members.append(user)
             db.session.commit()
@@ -185,7 +184,7 @@ def add_family_member(family_id):
                                           error="User is already a member of this family")
     return redirect(url_for('add_family_member'))
     
-   
+# Add shopping list functionality
 @app.route('/add_shopping_list/<int:family_id>', methods=['POST'])
 def add_shopping_list(family_id):
     if 'user_id' not in session:
@@ -206,6 +205,8 @@ def add_shopping_list(family_id):
     
     return redirect(url_for('home'))
 
+
+# Delete shopping list functionality
 @app.route('/delete_shopping_list/<int:list_id>', methods=['POST'])
 def delete_shopping_list(list_id):
     if 'user_id' not in session:
@@ -221,6 +222,7 @@ def delete_shopping_list(list_id):
     
     return redirect(url_for('home'))
 
+# Add shopping item functionality
 @app.route('/add_shopping_item/<int:list_id>', methods=['POST'])
 def add_shopping_item(list_id):
     if 'user_id' not in session:
@@ -244,6 +246,7 @@ def add_shopping_item(list_id):
     
     return redirect(url_for('home'))
 
+# Toggle item functionality (mark as completed)
 @app.route('/toggle_item/<int:item_id>', methods=['POST'])
 def toggle_item(item_id):
     if 'user_id' not in session:
@@ -260,6 +263,7 @@ def toggle_item(item_id):
     
     return redirect(url_for('home'))
 
+# Logout functionality
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)

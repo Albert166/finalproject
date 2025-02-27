@@ -30,6 +30,11 @@
                     </div>
                 </form>
 
+                <form method="POST" action="{{ url_for('delete_family', family_id=family.id) }}" class="mt-2">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete Family</button>
+                </form>
+                
+
                 <form method="POST" action="{{ url_for('add_shopping_list', family_id=family.id) }}" class="mb-2">
                     <div class="input-group">
                         <input type="text" name="name" class="form-control" placeholder="New List Name" required>
@@ -38,6 +43,7 @@
                         </div>
                     </div>
                 </form>
+
                 
 
                 {% for list in family.shopping_lists %}
