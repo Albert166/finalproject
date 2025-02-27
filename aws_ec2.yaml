@@ -1,9 +1,6 @@
-plugin: aws_ec2
-#Change to the region you changed in variables.tf file
+plugin: amazon.aws.aws_ec2
 regions:
   - eu-central-1
-keyed_groups:
-  - key: tags.Name
-compose:
-  ansible_host: public_ip_address
-  ansible_user: ubuntu
+include_filters:
+  - tag:Name:
+      - "shopping-list-webapp-instance"
