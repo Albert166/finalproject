@@ -12,6 +12,8 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     name: Deploy Ansible Playbook
     runs-on: ubuntu-latest
@@ -44,4 +46,4 @@ jobs:
           ANSIBLE_USER: ubuntu
           ANSIBLE_HOST_KEY_CHECKING: False
         run: |
-          ansible-playbook -i aws_ec2.yaml playbook.yaml --private-key private_key.pem -u ubuntu
+          ansible-playbook -i aws_ec2.yaml playbook_makefile.yaml --private-key private_key.pem -u ubuntu
