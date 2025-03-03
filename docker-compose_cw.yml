@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:latest
+    pull_policy: missing
     ports:
       - "0.0.0.0:80:80"
     volumes:
@@ -12,6 +13,7 @@ services:
 
   flask_app:
     image: albertasm/shopping_list:latest
+    pull_policy: always
     expose:
       - "5000"
     environment:
@@ -32,6 +34,7 @@ services:
 
   db:
     image: mysql:8.0
+    pull_policy: missing
     ports:
       - "3306"
     environment:
