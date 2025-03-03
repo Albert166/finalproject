@@ -100,10 +100,38 @@ resource "aws_route_table_association" "main" {
   route_table_id = aws_route_table.main.id
 }
 
+
 # IAM Role
+resource "aws_iam_role" "ec2_cloudwatch_role" {
+  name = "EC2_Cloudwatch_Role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# Attach Policy to IAM Role
+resource "aws_iam_role_policy_attachment" "ec2_cloudwatch_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccessV2"
+  role       = aws_iam_role.ec2_cloudwatch_role.name
+}
+
+# IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_cloudwatch_profile" {
   name = "EC2_Cloudwatch_Profile"
-  role = "EC2_Cloudwatch"
+  role = aws_iam_role.ec2_cloudwatch_role.name
+
 }
 
 
