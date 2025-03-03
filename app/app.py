@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy import create_engine
+import pymysql
 
-
-
-
+pymysql.install_as_MySQLdb()
 
 # App Configuration
 app = Flask(__name__)
@@ -270,3 +270,5 @@ def logout():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
+    
+
