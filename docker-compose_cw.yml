@@ -28,7 +28,7 @@ services:
       options:
         awslogs-region: eu-central-1
         awslogs-group: shopping-list
-    restart: always
+        awslogs-stream: shopping-list-log-stream
 
   db:
     image: mysql:8.0
