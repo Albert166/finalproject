@@ -75,7 +75,7 @@
         state: present
         build: always
         recreate: always
-        pull: missing
+        pull: policy
 
     - name: Check running Docker containers
       ansible.builtin.command: docker ps
